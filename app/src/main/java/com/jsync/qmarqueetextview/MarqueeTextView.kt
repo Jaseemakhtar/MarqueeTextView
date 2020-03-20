@@ -1,10 +1,13 @@
 package com.jsync.qmarqueetextview
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.util.AttributeSet
+import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.appcompat.widget.AppCompatTextView
 
 class MarqueeTextView
@@ -50,10 +53,16 @@ constructor(
                 roller = ValueAnimator.ofFloat(paddingLeft.toFloat(), -1f * (getTextWidth("\t\t\t") + textWidth - paddingLeft))
                 roller.startDelay = marqueeDelay
                 roller.duration = marqueeDuration
+                roller.interpolator = AccelerateDecelerateInterpolator()
                 roller.addUpdateListener {
                     textX = it.animatedValue as Float
                     invalidate()
                 }
+                roller.addListener(object : AnimatorListenerAdapter(){
+                    override fun onAnimationEnd(animation: Animator?) {
+                        roller.start()
+                    }
+                })
                 roller.start()
             }
         }
