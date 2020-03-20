@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="MarqueeTextView">
-        <attr name="marqueeText" format="string"/>
-        <attr name="marqueeTextSize" format="dimension" />
-        <attr name="marqueeTextStyle" format="enum" />
-        <attr name="marqueeTextColor" format="color" />
+        <attr name="marqueeDuration" format="integer" />
+        <attr name="marqueeDelay" format="integer" />
     </declare-styleable>
 </resources>
