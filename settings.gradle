@@ -1,0 +1,2 @@
+rootProject.name='QMarqueeTextView'
+include ':app'
