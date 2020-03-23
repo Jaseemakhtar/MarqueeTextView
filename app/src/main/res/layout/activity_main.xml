@@ -7,20 +7,24 @@
     tools:context=".MainActivity">
 
     <com.jsync.qmarqueetextview.MarqueeTextView
+        android:id="@+id/topMarquee"
         android:layout_width="77dp"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_gradient_caller_id"
         android:padding="4dp"
-        android:layout_height="wrap_content"
-        android:text="Jaseem"
+        android:text="Jaseem Akhtar"
+        android:textColor="#ffffff"
         android:textSize="22sp"
         android:textStyle="bold"
-        app:marqueeDelay="2000"
-        app:layout_constraintBottom_toTopOf="@+id/QMarqueeTextView"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.338"
+        app:marqueeDelay="2000" />
 
     <com.jsync.qmarqueetextview.MarqueeTextView
-        android:id="@+id/QMarqueeTextView"
+        android:id="@+id/bottomMarquee"
         android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:text="Avul Pakir Jainulabdeen Abdul Kalam"

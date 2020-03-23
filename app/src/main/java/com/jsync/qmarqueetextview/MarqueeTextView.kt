@@ -20,8 +20,10 @@ constructor(
 
     private var textX: Float
     private var textY: Float
-    private lateinit var roller: ValueAnimator
-    private val textBounds = Rect()
+    private var roller: ValueAnimator? =  null
+    private val textBounds: Rect by lazy {
+        Rect()
+    }
     private var textHeight: Int
     private var textWidth: Int
     private var marqueeText: String
@@ -35,6 +37,7 @@ constructor(
         textHeight = getTextHeight(text as String?)
         textWidth = getTextWidth(text as String)
         marqueeText = text.toString()
+        paint.color = currentTextColor
         marqueeDuration =
             typedArray.getInteger(R.styleable.MarqueeTextView_marqueeDuration, 3000).toLong()
         marqueeDelay =
@@ -42,28 +45,42 @@ constructor(
         typedArray.recycle()
     }
 
+    override fun setText(text: CharSequence?, type: BufferType?) {
+        super.setText(text, type)
+        marqueeText = text.toString()
+        textWidth = getTextWidth(marqueeText)
+        roller?.removeAllUpdateListeners()
+        roller?.cancel()
+        textX = paddingLeft.toFloat()
+        invalidate()
+    }
+
+    fun start(){
+        if(textWidth > width - (paddingLeft + paddingRight)){
+            // need to roll
+            marqueeText = "$text\t\t\t$text"
+            roller = ValueAnimator.ofFloat(paddingLeft.toFloat(), -1f * (getTextWidth("\t\t\t") + textWidth - paddingLeft))
+            roller?.startDelay = marqueeDelay
+            roller?.duration = marqueeDuration
+            roller?.interpolator = AccelerateDecelerateInterpolator()
+            roller?.addUpdateListener {
+                textX = it.animatedValue as Float
+                invalidate()
+            }
+            roller?.addListener(object : AnimatorListenerAdapter(){
+                override fun onAnimationEnd(animation: Animator?) {
+                    roller?.start()
+                }
+            })
+            roller?.start()
+        }
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        post {
+        post{
             textY = ((height / 2 + textHeight / 2).toFloat())
-            if(textWidth > width - (paddingLeft + paddingRight)){
-                // need to roll
-                marqueeText = "$text\t\t\t$text"
-                roller = ValueAnimator.ofFloat(paddingLeft.toFloat(), -1f * (getTextWidth("\t\t\t") + textWidth - paddingLeft))
-                roller.startDelay = marqueeDelay
-                roller.duration = marqueeDuration
-                roller.interpolator = AccelerateDecelerateInterpolator()
-                roller.addUpdateListener {
-                    textX = it.animatedValue as Float
-                    invalidate()
-                }
-                roller.addListener(object : AnimatorListenerAdapter(){
-                    override fun onAnimationEnd(animation: Animator?) {
-                        roller.start()
-                    }
-                })
-                roller.start()
-            }
+            invalidate()
         }
     }
 
