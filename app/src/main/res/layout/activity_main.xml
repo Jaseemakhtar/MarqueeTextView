@@ -27,7 +27,7 @@
         android:id="@+id/bottomMarquee"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Jaseem Akhtar"
+        android:text="by - Jaseem Akhtar"
         android:textSize="30sp"
         app:marqueeDelay="2000"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -36,6 +36,7 @@ constructor(
 
     init {
         val typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.MarqueeTextView)
+        isSingleLine = true
         textX = paddingLeft.toFloat()
         textHeight = getTextHeight(text.toString())
         textWidth = getTextWidth(text.toString())
