@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Rect
 import android.graphics.Region
 import android.os.Build
 import android.util.AttributeSet
@@ -22,10 +21,7 @@ constructor(
     private var textX: Float
     private var textY: Float = 0f
     private var roller: ValueAnimator? = null
-    private val textBounds: Rect by lazy {
-        Rect()
-    }
-    private var textHeight: Int
+    private var textHeight: Float
     private var textWidth: Int
     private var marqueeText: String
     private var marqueeDuration: Long
@@ -89,7 +85,7 @@ constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         post {
-            textY = ((height / 2 + textHeight / 2).toFloat())
+            textY = ((height / 2 - textHeight / 2))
             clipWidth = width - paddingRight
             isLayoutReady = true
             invalidate()
@@ -124,8 +120,8 @@ constructor(
         return paint.measureText(txt).toInt()
     }
 
-    private fun getTextHeight(txt: String? = "Dummy"): Int {
-        paint.getTextBounds(txt, 0, txt!!.length, textBounds)
-        return textBounds.height()
+    private fun getTextHeight(txt: String? = "Dummy"): Float {
+        val fontMetrics = paint.fontMetrics
+        return fontMetrics.descent + fontMetrics.ascent
     }
 }
