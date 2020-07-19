@@ -1,17 +1,17 @@
-package com.jsync.qmarqueetextview
+package com.jsync.marqueetextview
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Region
-import android.os.Build
+import android.graphics.Path
 import android.util.AttributeSet
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.appcompat.widget.AppCompatTextView
 
-class MarqueeTextView @JvmOverloads
+class MarqueeTextView
+@JvmOverloads
 constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
@@ -20,7 +20,8 @@ constructor(
 
     private var textX: Float
     private var textY: Float = 0f
-    private var roller: ValueAnimator? = null
+    private var rollerAnimator: ValueAnimator? = null
+
     private var textHeight: Float
     private var textWidth: Int
     private var marqueeText: String
@@ -28,13 +29,14 @@ constructor(
     private var marqueeDelay: Long
     private var isAnimSet: Boolean = false
     private var isLayoutReady: Boolean = false
-    private var clipWidth: Int = 0
+
+    private val path = Path()
 
     init {
         val typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.MarqueeTextView)
-        isSingleLine = true
+        setSingleLine(true)
         textX = paddingLeft.toFloat()
-        textHeight = getTextHeight(text.toString())
+        textHeight = getTextHeight()
         textWidth = getTextWidth(text.toString())
         marqueeText = text.toString()
         paint.color = currentTextColor
@@ -49,8 +51,7 @@ constructor(
         super.setText(text, type)
         marqueeText = text.toString()
         textWidth = getTextWidth(marqueeText)
-        roller?.removeAllUpdateListeners()
-        roller?.cancel()
+        cancelRollerAnimation()
         textX = paddingLeft.toFloat()
         invalidate()
     }
@@ -61,67 +62,78 @@ constructor(
             if (textWidth > width - (paddingStart + paddingEnd)) {
                 // need to roll
                 marqueeText = "$text\t\t\t$text"
-                roller = ValueAnimator.ofFloat(
+                rollerAnimator = ValueAnimator.ofFloat(
                     paddingLeft.toFloat(),
-                    -1f * (getTextWidth("\t\t\t") + textWidth - paddingLeft)
+                    -1.0f * (getTextWidth("\t\t\t") + textWidth - paddingLeft)
                 )
-                roller?.startDelay = marqueeDelay
-                roller?.duration = marqueeDuration
-                roller?.interpolator = AccelerateDecelerateInterpolator()
-                roller?.addUpdateListener {
+                rollerAnimator?.startDelay = marqueeDelay
+                rollerAnimator?.duration = marqueeDuration
+                rollerAnimator?.interpolator = AccelerateDecelerateInterpolator()
+                rollerAnimator?.addUpdateListener {
                     textX = it.animatedValue as Float
                     invalidate()
                 }
-                roller?.addListener(object : AnimatorListenerAdapter() {
+                rollerAnimator?.addListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
-                        roller?.start()
+                        rollerAnimator?.start()
                     }
                 })
-                roller?.start()
+                rollerAnimator?.start()
             }
         }
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        post {
-            textY = ((height / 2 - textHeight / 2))
-            clipWidth = width - paddingRight
-            isLayoutReady = true
-            invalidate()
-            if (isAnimSet) {
-                start()
-            }
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (!path.isEmpty) {
+            path.reset()
+        }
+        path.addRect(
+            paddingLeft.toFloat(),
+            0.0f,
+            (w - paddingRight).toFloat(),
+            h.toFloat(),
+            Path.Direction.CW
+        )
+        textHeight = getTextHeight()
+        textY =
+            ((((height - (paddingTop + paddingBottom)) - textHeight) / 2) + textHeight) - (paint.fontMetrics.descent)
+        textY += paddingTop
+        isLayoutReady = true
+        invalidate()
+        if (isAnimSet) {
+            start()
         }
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        roller?.removeAllUpdateListeners()
-        roller?.cancel()
+        cancelRollerAnimation()
     }
 
     override fun onDraw(canvas: Canvas?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            canvas?.clipRect(paddingLeft, 0, clipWidth, height)
-        } else {
-            canvas?.clipRect(
-                paddingLeft.toFloat(),
-                0f,
-                clipWidth.toFloat(),
-                height.toFloat(),
-                Region.Op.INTERSECT
-            )
+        canvas?.let {
+            it.save()
+            it.clipPath(path)
+            it.drawText(marqueeText, textX, textY, paint)
+            it.restore()
         }
-        canvas?.drawText(marqueeText, textX, textY, paint)
     }
 
-    private fun getTextWidth(txt: String? = "Dummy"): Int {
-        return paint.measureText(txt).toInt()
+    private fun getTextWidth(text: String): Int {
+        return paint.measureText(text).toInt()
     }
 
-    private fun getTextHeight(txt: String? = "Dummy"): Float {
+    private fun getTextHeight(): Float {
         val fontMetrics = paint.fontMetrics
-        return fontMetrics.descent + fontMetrics.ascent
+        return fontMetrics.descent + -fontMetrics.ascent
+    }
+
+    private fun cancelRollerAnimation() {
+        if (rollerAnimator?.isRunning == true) {
+            rollerAnimator?.cancel()
+        }
+        rollerAnimator?.removeAllUpdateListeners()
+        rollerAnimator?.removeAllListeners()
     }
 }

@@ -1,4 +1,4 @@
-package com.jsync.qmarqueetextview
+package com.jsync.marqueetextview
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

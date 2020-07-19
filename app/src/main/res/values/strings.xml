@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">QMarqueeTextView</string>
+    <string name="app_name">MarqueeTextView Demo</string>
     <string name="default_marquee_text">Avul Pakir Jainulabdeen Abdul Kalam</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.jsync.qmarqueetextview
+package com.jsync.marqueetextview
 
 import org.junit.Test
 
